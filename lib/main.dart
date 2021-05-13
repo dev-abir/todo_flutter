@@ -1,7 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:todo_flutter/Dialogs.dart';
-import 'dart:math';
+import 'package:todo_flutter/Dialog.dart';
 
 import 'Todo.dart';
 
@@ -53,7 +54,6 @@ class _HomePageState extends State<HomePage> {
   void _cardOnTap(Todo todo) {
     // if multiple-select mode is on, tap should select the list item
     if (selectMode && _todosSelected.containsValue(true)) {
-      debugPrint('Card tapped, ${todo.toString()}');
       setState(() {
         _todosSelected[todo.ID] = !_todosSelected[todo.ID];
       });
@@ -65,13 +65,29 @@ class _HomePageState extends State<HomePage> {
       });
 
       // show dialog to edit & save...
-      setState(() {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return TodoDialog(todo: todo); // this class will mutate the todo object itself...
-          },
-        );
+      // TODO: if new title or content is empty, delete that todo...
+      TodoDialog _todoDialog =
+          TodoDialog(todoTitle: todo.title, todoContent: todo.content);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return _todoDialog;
+        },
+      ).then((value) {
+        setState(() {
+          // TODO: the TodoDialog class could have
+          // a constructor with just a "Todo, instead of
+          // title and content... the dialog class could mutate
+          // the todo object... but the setState() doesn't work properly(maybe)
+          // like: setState() { ... ... ... builder: (context) {
+          //           return TodoDialog(todoObj);
+          //         }, }
+
+          // and ultimately, we have to use title and content separately for
+          // insertion into database...
+          todo.title = _todoDialog.todoTitle;
+          todo.content = _todoDialog.todoContent;
+        });
       });
     }
   }
@@ -89,11 +105,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _addNewTodo(String title, String content) {
-    if (!title.isEmpty && !content.isEmpty) {
+    if (title.isNotEmpty || content.isNotEmpty) {
       int newTodoID = todos.length + 1;
       todos.add(Todo(ID: newTodoID, title: title, content: content));
       _todosSelected[newTodoID] = false;
-      debugPrint(_todosSelected.toString());
     }
   }
 
@@ -163,15 +178,14 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Todo todoObj = Todo(ID: todos.length + 1, title: '', content: '');
+          TodoDialog _todoDialog = TodoDialog(todoTitle: '', todoContent: '');
           showDialog(
               context: context,
               builder: (context) {
-                return TodoDialog(todo: todoObj);
+                return _todoDialog;
               }).then((value) {
-            debugPrint('totk $todoObj');
             setState(() {
-              _addNewTodo(todoObj.title, todoObj.content);
+              _addNewTodo(_todoDialog.todoTitle, _todoDialog.todoContent);
             });
           });
         },

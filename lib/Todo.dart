@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 class Todo {
-
   final int ID;
   String title;
   String content;

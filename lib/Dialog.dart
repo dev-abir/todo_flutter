@@ -6,31 +6,34 @@ import 'package:flutter/widgets.dart';
 import 'Todo.dart';
 
 class TodoDialog extends StatefulWidget {
-  final Todo todo;
-  final String actionButtonText;
+  String todoTitle;
+  String todoContent;
+  String _actionButtonText;
 
-  TodoDialog({@required this.todo}) : actionButtonText = (todo.title.isEmpty && todo.content.isEmpty)? 'Add' : 'Save';
+  TodoDialog({this.todoTitle, this.todoContent})
+      : _actionButtonText =
+            (todoTitle.isEmpty && todoContent.isEmpty) ? 'Add' : 'Save';
 
   @override
   _TodoDialogState createState() => _TodoDialogState();
 }
 
 class _TodoDialogState extends State<TodoDialog> {
-  TextEditingController _titleTxtEditController;
-  TextEditingController _contentTxtEditController;
+  TextEditingController _titleController;
+  TextEditingController _contentController;
 
   @override
   void initState() {
     super.initState();
-    _titleTxtEditController = TextEditingController(text: widget.todo.title);
-    _contentTxtEditController = TextEditingController(text: widget.todo.content);
+    _titleController = TextEditingController(text: widget.todoTitle);
+    _contentController = TextEditingController(text: widget.todoContent);
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    _contentTxtEditController.dispose();
-    _titleTxtEditController.dispose();
+    _contentController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -50,26 +53,32 @@ class _TodoDialogState extends State<TodoDialog> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextField(
-              controller: _titleTxtEditController,
+              controller: _titleController,
               decoration: InputDecoration(
                   border: OutlineInputBorder(), hintText: 'Enter title'),
             ),
-            SizedBox(height: 16,),
+            SizedBox(
+              height: 16,
+            ),
             TextField(
               maxLines: 5,
-              controller: _contentTxtEditController,
+              controller: _contentController,
               decoration: InputDecoration(
                   border: OutlineInputBorder(), hintText: 'Enter content'),
             ),
-            SizedBox(height: 16,),
-            ElevatedButton(onPressed: () {
-              // no need to check... these will be checked while adding widgets (in main.dart -> _addNewTodo(..,..) function)
-              // if (!titleTxtEditController.text.isEmpty && !contentTxtEditController.text.isEmpty) {
-              widget.todo.title = _titleTxtEditController.text;
-              widget.todo.content = _contentTxtEditController.text;
-              // }
-              Navigator.of(context).pop();
-            }, child: Text(widget.actionButtonText))
+            SizedBox(
+              height: 16,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  // no need to check... these will be checked while adding widgets (in main.dart -> _addNewTodo(..,..) function)
+                  // if (!titleTxtEditController.text.isEmpty && !contentTxtEditController.text.isEmpty) {
+                  widget.todoTitle = _titleController.text;
+                  widget.todoContent = _contentController.text;
+                  // }
+                  Navigator.of(context).pop();
+                },
+                child: Text(widget._actionButtonText))
           ],
         ),
       ),
