@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'Todo.dart';
-
 class TodoDialog extends StatefulWidget {
-  final Todo todo;
+  String todoTitle, todoContent;
   final String _actionButtonText;
 
-  TodoDialog({this.todo})
+  TodoDialog({this.todoTitle, this.todoContent})
       : _actionButtonText =
-            (todo.title.isEmpty && todo.content.isEmpty) ? 'Add' : 'Save';
+            (todoTitle.isEmpty && todoContent.isEmpty) ? 'Add' : 'Save';
 
   @override
   _TodoDialogState createState() => _TodoDialogState();
@@ -25,14 +23,14 @@ class _TodoDialogState extends State<TodoDialog> {
   void initState() {
     super.initState();
     _actionButtonOpacity = _ACTION_BUTTON_DISABLED_OPACITY;
-    _titleController = TextEditingController(text: widget.todo.title);
-    _contentController = TextEditingController(text: widget.todo.content);
+    _titleController = TextEditingController(text: widget.todoTitle);
+    _contentController = TextEditingController(text: widget.todoContent);
 
     // to dim the action button, if title/content is empty, or if it isn;t edited...
     // TODO: also do these checks, when actually inserting/updating the dbase...
     // or is same value inserts restricted by the dbase library?
-    String initialTitleText = widget.todo.title;
-    String initialContentText = widget.todo.content;
+    String initialTitleText = widget.todoTitle;
+    String initialContentText = widget.todoContent;
     Function actionButtonOpacityHandler = () {
       setState(() {
         if ((_titleController.text.trim().isNotEmpty ||
@@ -74,7 +72,9 @@ class _TodoDialogState extends State<TodoDialog> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: 'Enter title'),
+                border: OutlineInputBorder(),
+                hintText: 'Enter title',
+              ),
             ),
             SizedBox(
               height: 16,
@@ -83,7 +83,9 @@ class _TodoDialogState extends State<TodoDialog> {
               maxLines: 5,
               controller: _contentController,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: 'Enter content'),
+                border: OutlineInputBorder(),
+                hintText: 'Enter content',
+              ),
             ),
             SizedBox(
               height: 16,
@@ -95,8 +97,8 @@ class _TodoDialogState extends State<TodoDialog> {
                   onPressed: () {
                     // no need to check... these will be checked while adding widgets (in main.dart -> _addNewTodo(..,..) function)
                     // if (!titleTxtEditController.text.isEmpty && !contentTxtEditController.text.isEmpty) {
-                    widget.todo.title = _titleController.text.trim();
-                    widget.todo.content = _contentController.text.trim();
+                    widget.todoTitle = _titleController.text.trim();
+                    widget.todoContent = _contentController.text.trim();
                     // }
                     Navigator.of(context).pop();
                   },

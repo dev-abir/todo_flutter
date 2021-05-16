@@ -56,15 +56,26 @@ class _HomePageState extends State<HomePage> {
 
       // show dialog to edit & save...
       // TODO: if new title or content is empty, delete that todo...
-      TodoDialog todoDialog = TodoDialog(todo: todo);
+      TodoDialog todoDialog =
+          TodoDialog(todoTitle: todo.title, todoContent: todo.content);
       showDialog(
         context: context,
-        builder: (context) {
-          return todoDialog;
-        },
-      );
-      DBProvider.db.updateTodo(todo);
-      setState(() {}); // re-build with updated todo...
+        builder: (context) => todoDialog,
+      ).then((value) {
+        DBProvider.db.updateTodo(todo).then((value) {
+          setState(() {
+            // TODO: the TodoDialog class could have
+            // a constructor with just a "Todo, instead of
+            // title and content... the dialog class could mutate
+            // the todo object... but the setState() doesn't work properly(maybe)
+            // like: setState() { showDialog... ... ... ... builder: (context) {
+            //           return TodoDialog(todoObj);
+            //         }, }
+            todo.title = todoDialog.todoTitle;
+            todo.content = todoDialog.todoContent;
+          });
+        });
+      });
     }
   }
 
@@ -135,18 +146,15 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Todo todo = Todo(title: '', content: '');
           TodoDialog todoDialog = TodoDialog(
-            todo: todo,
+            todoTitle: '',
+            todoContent: '',
           );
           showDialog(
-              context: context,
-              builder: (context) {
-                return todoDialog;
-              }).then((value) {
-            setState(() {
-              _addNewTodo(todo.title, todo.content);
-            });
+            context: context,
+            builder: (context) => todoDialog,
+          ).then((value) {
+            _addNewTodo(todoDialog.todoTitle, todoDialog.todoContent);
           });
         },
         tooltip: 'Increment',
@@ -173,12 +181,10 @@ class _HomePageState extends State<HomePage> {
                     Flexible(
                       child: Container(
                         padding: EdgeInsets.all(10.0),
-                        child: Text(
-                          todo.title,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: Text(todo.title,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis),
                       ),
                     )
                   ],
