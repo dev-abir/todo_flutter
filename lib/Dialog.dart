@@ -1,18 +1,15 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'Todo.dart';
 
 class TodoDialog extends StatefulWidget {
-  String todoTitle;
-  String todoContent;
-  String _actionButtonText;
+  final Todo todo;
+  final String _actionButtonText;
 
-  TodoDialog({this.todoTitle, this.todoContent})
+  TodoDialog({this.todo})
       : _actionButtonText =
-            (todoTitle.isEmpty && todoContent.isEmpty) ? 'Add' : 'Save';
+            (todo.title.isEmpty && todo.content.isEmpty) ? 'Add' : 'Save';
 
   @override
   _TodoDialogState createState() => _TodoDialogState();
@@ -21,12 +18,34 @@ class TodoDialog extends StatefulWidget {
 class _TodoDialogState extends State<TodoDialog> {
   TextEditingController _titleController;
   TextEditingController _contentController;
+  static const double _ACTION_BUTTON_DISABLED_OPACITY = 0.3;
+  double _actionButtonOpacity;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.todoTitle);
-    _contentController = TextEditingController(text: widget.todoContent);
+    _actionButtonOpacity = _ACTION_BUTTON_DISABLED_OPACITY;
+    _titleController = TextEditingController(text: widget.todo.title);
+    _contentController = TextEditingController(text: widget.todo.content);
+
+    // to dim the action button, if title/content is empty, or if it isn;t edited...
+    // TODO: also do these checks, when actually inserting/updating the dbase...
+    // or is same value inserts restricted by the dbase library?
+    String initialTitleText = widget.todo.title;
+    String initialContentText = widget.todo.content;
+    Function actionButtonOpacityHandler = () {
+      setState(() {
+        if ((_titleController.text.trim().isNotEmpty ||
+                _contentController.text.trim().isNotEmpty) &&
+            ((_titleController.text.trim() != initialTitleText) ||
+                (_contentController.text.trim() != initialContentText)))
+          _actionButtonOpacity = 1;
+        else
+          _actionButtonOpacity = _ACTION_BUTTON_DISABLED_OPACITY;
+      });
+    };
+    _titleController.addListener(actionButtonOpacityHandler);
+    _contentController.addListener(actionButtonOpacityHandler);
   }
 
   @override
@@ -69,16 +88,20 @@ class _TodoDialogState extends State<TodoDialog> {
             SizedBox(
               height: 16,
             ),
-            ElevatedButton(
-                onPressed: () {
-                  // no need to check... these will be checked while adding widgets (in main.dart -> _addNewTodo(..,..) function)
-                  // if (!titleTxtEditController.text.isEmpty && !contentTxtEditController.text.isEmpty) {
-                  widget.todoTitle = _titleController.text;
-                  widget.todoContent = _contentController.text;
-                  // }
-                  Navigator.of(context).pop();
-                },
-                child: Text(widget._actionButtonText))
+            Opacity(
+              opacity: _actionButtonOpacity,
+              // to dim the action button, if title/content is empty, or if it isn;t edited...
+              child: ElevatedButton(
+                  onPressed: () {
+                    // no need to check... these will be checked while adding widgets (in main.dart -> _addNewTodo(..,..) function)
+                    // if (!titleTxtEditController.text.isEmpty && !contentTxtEditController.text.isEmpty) {
+                    widget.todo.title = _titleController.text.trim();
+                    widget.todo.content = _contentController.text.trim();
+                    // }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(widget._actionButtonText)),
+            )
           ],
         ),
       ),

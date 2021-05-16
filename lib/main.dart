@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:todo_flutter/Dbase.dart';
@@ -29,7 +28,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Todo> todos = [];
   Map<int, bool> _todosSelected;
-  bool selectMode = false;
+  bool _selectMode = false;
   Future<List<Todo>> _data;
 
   Future<List<Todo>> _fetchFromDB() async {
@@ -48,53 +47,33 @@ class _HomePageState extends State<HomePage> {
 
   void _cardOnTap(Todo todo) {
     // if multiple-select mode is on, tap should select the list item
-    if (selectMode && _todosSelected.containsValue(true)) {
-      setState(() {
-        _todosSelected[todo.ID] = !_todosSelected[todo.ID];
-      });
+    if (_selectMode && _todosSelected.containsValue(true)) {
+      setState(() => _todosSelected[todo.ID] = !_todosSelected[todo.ID]);
     } else {
       // stop multi-select mode, when there's no more selected items
       debugPrint('selectMode STOP');
-      setState(() {
-        selectMode = false;
-      });
+      setState(() => _selectMode = false);
 
       // show dialog to edit & save...
       // TODO: if new title or content is empty, delete that todo...
-      TodoDialog todoDialog =
-          TodoDialog(todoTitle: todo.title, todoContent: todo.content);
+      TodoDialog todoDialog = TodoDialog(todo: todo);
       showDialog(
         context: context,
         builder: (context) {
           return todoDialog;
         },
-      ).then((value) {
-        DBProvider.db.updateTodo(todo).then((value) {
-          setState(() {
-            // TODO: the TodoDialog class could have
-            // a constructor with just a "Todo, instead of
-            // title and content... the dialog class could mutate
-            // the todo object... but the setState() doesn't work properly(maybe)
-            // like: setState() { ... ... ... builder: (context) {
-            //           return TodoDialog(todoObj);
-            //         }, }
-
-            // and ultimately, we have to use title and content separately for
-            // insertion into database...
-            todo.title = todoDialog.todoTitle;
-            todo.content = todoDialog.todoContent;
-          });
-        });
-      });
+      );
+      DBProvider.db.updateTodo(todo);
+      setState(() {}); // re-build with updated todo...
     }
   }
 
   void _cardOnLongPress(Todo todo) {
     // start multiple-select mode on long press
-    if (!selectMode) {
+    if (!_selectMode) {
       // TODO: is this if check required?
       debugPrint('selectMode START');
-      selectMode = true;
+      _selectMode = true;
     }
     setState(() {
       _todosSelected[todo.ID] = !_todosSelected[todo.ID];
@@ -118,7 +97,8 @@ class _HomePageState extends State<HomePage> {
   void _delTodos() {
     // TODO: can be made more efficient?
     List<int> todoIDsToBeDeleted = [];
-    _todosSelected.forEach((key, value) => { if (value) todoIDsToBeDeleted.add(key) });
+    _todosSelected
+        .forEach((key, value) => {if (value) todoIDsToBeDeleted.add(key)});
     DBProvider.db.deleteMultipleTodosWithID(todoIDsToBeDeleted).then((value) {
       setState(() {
         for (int ID in todoIDsToBeDeleted) {
@@ -136,7 +116,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
         actions: [
           Visibility(
-            visible: selectMode,
+            visible: _selectMode,
             child: IconButton(
               onPressed: _delTodos,
               icon: const Icon(Icons.delete),
@@ -155,14 +135,17 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          TodoDialog todoDialog = TodoDialog(todoTitle: '', todoContent: '');
+          Todo todo = Todo(title: '', content: '');
+          TodoDialog todoDialog = TodoDialog(
+            todo: todo,
+          );
           showDialog(
               context: context,
               builder: (context) {
                 return todoDialog;
               }).then((value) {
             setState(() {
-              _addNewTodo(todoDialog.todoTitle, todoDialog.todoContent);
+              _addNewTodo(todo.title, todo.content);
             });
           });
         },

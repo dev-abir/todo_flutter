@@ -47,10 +47,12 @@ class DBProvider {
 
   Future<int> updateTodo(Todo updatedTodo) async {
     final db = await database;
-    return await db.update("todos", updatedTodo.toMap_DB(), where: "id=?", whereArgs: [updatedTodo.ID]);
+    return await db.update("todos", updatedTodo.toMap_DB(),
+        where: "id=?", whereArgs: [updatedTodo.ID]);
   }
 
-  /*TODO: return type?*/ Future deleteMultipleTodosWithID(List<int> IDs) async {
+  /*TODO: return type?*/
+  Future deleteMultipleTodosWithID(List<int> IDs) async {
     final db = await database;
     Batch batch = db.batch();
     for (int ID in IDs) {
@@ -59,7 +61,7 @@ class DBProvider {
     return await batch.commit(); // TODO: await batch.commit(noResult: true); is
     // faster, but it will ignore the results...
   }
-  
+
   /*TODO: return type?*/
   insertMultipleTodos(List<Todo> todos) async {
     final db = await database;
