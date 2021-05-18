@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+// TODO: the TodoDialog class could have
+// a constructor with just a "Todo, instead of
+// title and content... the dialog class could mutate
+// the todo object... but the setState() doesn't work properly(maybe)
+// like: setState() { showDialog... ... ... ... builder: (context) {
+//           return TodoDialog(todoObj);
+//         }, }
+// (see about line 67 of main.dart)
 class TodoDialog extends StatefulWidget {
   String todoTitle, todoContent;
   final String _actionButtonText;
 
-  TodoDialog({this.todoTitle, this.todoContent})
+  TodoDialog({this.todoTitle = '', this.todoContent = ''})
       : _actionButtonText =
             (todoTitle.isEmpty && todoContent.isEmpty) ? 'Add' : 'Save';
 

@@ -9,13 +9,18 @@ const MaterialColor THEME_COL = Colors.red;
 const Color WHITE_MODE_COL = Colors.white;
 
 void main() {
-  runApp(MaterialApp(
-    title: 'TODO',
-    theme: ThemeData(
-      primarySwatch: THEME_COL,
-    ),
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'TODO',
+        theme: ThemeData(primarySwatch: THEME_COL),
     home: HomePage(),
-  ));
+    );
+  }
 }
 
 class HomePage extends StatefulWidget {
@@ -41,14 +46,14 @@ class _HomePageState extends State<HomePage> {
     _data = _fetchFromDB();
     _data.then((value) {
       todos = value;
-      _todosSelected = {for (Todo todo in todos) todo.ID: false};
+      _todosSelected = {for (Todo todo in todos) todo.id: false};
     });
   }
 
   void _cardOnTap(Todo todo) {
     // if multiple-select mode is on, tap should select the list item
     if (_selectMode && _todosSelected.containsValue(true)) {
-      setState(() => _todosSelected[todo.ID] = !_todosSelected[todo.ID]);
+      setState(() => _todosSelected[todo.id] = !_todosSelected[todo.id]);
     } else {
       // stop multi-select mode, when there's no more selected items
       debugPrint('selectMode STOP');
@@ -60,9 +65,9 @@ class _HomePageState extends State<HomePage> {
           TodoDialog(todoTitle: todo.title, todoContent: todo.content);
       showDialog(
         context: context,
-        builder: (context) => todoDialog,
-      ).then((value) {
-        DBProvider.db.updateTodo(todo).then((value) {
+        builder: (_) => todoDialog,
+      ).then((_) {
+        DBProvider.db.updateTodo(todo).then((_) {
           setState(() {
             // TODO: the TodoDialog class could have
             // a constructor with just a "Todo, instead of
@@ -87,7 +92,7 @@ class _HomePageState extends State<HomePage> {
       _selectMode = true;
     }
     setState(() {
-      _todosSelected[todo.ID] = !_todosSelected[todo.ID];
+      _todosSelected[todo.id] = !_todosSelected[todo.id];
     });
   }
 
@@ -97,7 +102,7 @@ class _HomePageState extends State<HomePage> {
           .insertTodo(Todo(title: title, content: content))
           .then((newTodoID) {
         setState(() {
-          todos.add(Todo(ID: newTodoID, title: title, content: content));
+          todos.add(Todo(id: newTodoID, title: title, content: content));
           _todosSelected[newTodoID] = false;
         });
       });
@@ -110,11 +115,11 @@ class _HomePageState extends State<HomePage> {
     List<int> todoIDsToBeDeleted = [];
     _todosSelected
         .forEach((key, value) => {if (value) todoIDsToBeDeleted.add(key)});
-    DBProvider.db.deleteMultipleTodosWithID(todoIDsToBeDeleted).then((value) {
+    DBProvider.db.deleteMultipleTodosWithID(todoIDsToBeDeleted).then((_) {
       setState(() {
         for (int ID in todoIDsToBeDeleted) {
           _todosSelected.remove(ID);
-          todos.removeWhere((element) => element.ID == ID);
+          todos.removeWhere((element) => element.id == ID);
         }
       });
     });
@@ -123,48 +128,47 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          Visibility(
-            visible: _selectMode,
-            child: IconButton(
-              onPressed: _delTodos,
-              icon: const Icon(Icons.delete),
-              iconSize: 35.0,
-              tooltip: 'Delete TODOs',
-            ),
-          )
-        ],
-      ),
-      body: FutureBuilder(
-        // TODO: ?? initialData:
-        future: _data,
-        builder: (context, snapshot) => snapshot.hasData
-            ? _buildWidget(snapshot.data)
-            : Center(child: CircularProgressIndicator()),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          TodoDialog todoDialog = TodoDialog(
-            todoTitle: '',
-            todoContent: '',
-          );
-          showDialog(
-            context: context,
-            builder: (context) => todoDialog,
-          ).then((value) {
-            _addNewTodo(todoDialog.todoTitle, todoDialog.todoContent);
-          });
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            Visibility(
+              visible: _selectMode,
+              child: IconButton(
+                onPressed: _delTodos,
+                icon: const Icon(Icons.delete),
+                iconSize: 35.0,
+                tooltip: 'Delete TODOs',
+              ),
+            )
+          ],
+        ),
+        body: FutureBuilder(
+          // TODO: ?? initialData:
+          future: _data,
+          builder: (_, snapshot) => snapshot.hasData
+              ? _buildWidget()
+              : Center(child: CircularProgressIndicator()),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            TodoDialog todoDialog = TodoDialog(
+              todoTitle: '',
+              todoContent: '',
+            );
+            showDialog(
+              context: context,
+              builder: (_) => todoDialog,
+            ).then((_) {
+              _addNewTodo(todoDialog.todoTitle, todoDialog.todoContent);
+            });
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ),
+      );
   }
 
-  Widget _buildWidget(List<Todo> data) {
-    //TODO: parameter (data) hasn't been used here...
+  Widget _buildWidget() {
     return Scrollbar(
       thickness: 10.0,
       child: Container(
@@ -191,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               // change color on selection
-              color: _todosSelected[todo.ID] ? THEME_COL : WHITE_MODE_COL,
+              color: _todosSelected[todo.id] ? THEME_COL : WHITE_MODE_COL,
             );
           }).toList(),
         ),

@@ -1,17 +1,17 @@
 class Todo {
-  int ID;
+  int id;
   String title;
   String content;
 
-  Todo({this.ID, this.title, this.content});
+  Todo({this.id, this.title, this.content});
 
   @override
   String toString() {
-    return 'Todo{ID: $ID, title: $title, content: $content}';
+    return 'Todo{ID: $id, title: $title, content: $content}';
   }
 
   factory Todo.fromMap(Map<String, dynamic> json) => Todo(
-        ID: json["id"],
+        id: json["id"],
         title: json["title"],
         content: json["content"],
       );

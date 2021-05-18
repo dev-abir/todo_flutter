@@ -48,14 +48,14 @@ class DBProvider {
   Future<int> updateTodo(Todo updatedTodo) async {
     final db = await database;
     return await db.update("todos", updatedTodo.toMap_DB(),
-        where: "id=?", whereArgs: [updatedTodo.ID]);
+        where: "id=?", whereArgs: [updatedTodo.id]);
   }
 
   /*TODO: return type?*/
-  Future deleteMultipleTodosWithID(List<int> IDs) async {
+  Future deleteMultipleTodosWithID(List<int> ids) async {
     final db = await database;
     Batch batch = db.batch();
-    for (int ID in IDs) {
+    for (int ID in ids) {
       db.delete("todos", where: "id=?", whereArgs: [ID]);
     }
     return await batch.commit(); // TODO: await batch.commit(noResult: true); is

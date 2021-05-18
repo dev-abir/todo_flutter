@@ -7,10 +7,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:todo_flutter/Dialog.dart';
 
 import 'package:todo_flutter/main.dart';
 
 void main() {
+  /*
+  // default sample test...
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp());
@@ -26,5 +29,32 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+  });*/
+
+  testWidgets('find + icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(HomePage());
+    expect(find.byIcon(Icons.add), findsOneWidget);
   });
+
+  /* TODO: test isn't passing, don't know why... :(
+  testWidgets('add one todo test', (WidgetTester tester) async {
+    await tester.pumpWidget(MyApp());
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    expect(find.text('Enter title'), findsOneWidget);
+    await tester.enterText(find.text('Enter title'), 'gorilla');
+    await tester.pump();
+
+    expect(find.text('Enter content'), findsOneWidget);
+    await tester.enterText(find.text('Enter content'), 'huge gorilla');
+    await tester.pump();
+
+    expect(find.text('Add'), findsOneWidget);
+    await tester.tap(find.text('Add'));
+    await tester.pump();
+
+    expect(find.text('gorilla'), findsOneWidget);
+  }); */
 }
